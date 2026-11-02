@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Titres likés{% endblock %}
+
+{% block body %}
+    <h2>Mes titres likés</h2>
+
+    <div class="track-list">
+        {% for track in tracks %}
+            {{ include('track/_item.html.twig', {track: track}) }}
+        {% else %}
+            <p>Vous n'avez encore liké aucun morceau.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

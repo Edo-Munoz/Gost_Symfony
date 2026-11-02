@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes playlists{% endblock %}
+
+{% block body %}
+    <h2>Mes playlists</h2>
+
+    <div>
+        {{ form(form) }}
+    </div>
+
+    <div class="playlists">
+        {% for playlist in playlists %}
+            <article>
+                <h3>{{ playlist.name }}</h3>
+                <p>{{ playlist.tracks|length }} morceau(x)</p>
+                <a href="{{ path('app_playlist_show', {id: playlist.id}) }}" class="btn btn-small">Ouvrir</a>
+            </article>
+        {% else %}
+            <p>Vous n'avez pas encore de playlist.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

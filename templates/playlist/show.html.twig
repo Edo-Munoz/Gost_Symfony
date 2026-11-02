@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ playlist.name }}{% endblock %}
+
+{% block body %}
+    <header>
+        <h2>{{ playlist.name }}</h2>
+        <form method="post" action="{{ path('app_playlist_delete', {id: playlist.id}) }}"
+              onsubmit="return confirm('Supprimer cette playlist ?');">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete_playlist' ~ playlist.id) }}">
+            <button class="btn btn-outline btn-small">Supprimer la playlist</button>
+        </form>
+    </header>
+    <p class="muted">{{ playlist.tracks|length }} morceau(x)</p>
+
+    <div class="track-list">
+        {% for track in playlist.tracks %}
+            <div class="track{{ track.youtubeId ? ' playable' : '' }}"{% if track.youtubeId %} {{ include('track/_play_attrs.html.twig') }} onclick="rowClick(event, this)" onkeydown="if (event.key === 'Enter') { rowClick(event, this); }" tabindex="0"{% endif %}>
+                <div>
+                    <strong>{{ track.title }}</strong>
+                    <span class="muted">- {{ track.gameName }}</span><br>
+                    <small class="muted">{{ track.composer ?: 'Compositeur inconnu' }}</small>
+                </div>
+                <div class="actions">
+                    <form method="post" action="{{ path('app_playlist_remove_track', {id: playlist.id, trackId: track.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('remove_track' ~ playlist.id ~ '_' ~ track.id) }}">
+                        <button class="btn btn-outline btn-small">Retirer</button>
+                    </form>
+                </div>
+            </div>
+        {% else %}
+            <p>Cette playlist est vide. Ajoutez des morceaux depuis la page <a href="{{ path('app_track_index') }}">Rechercher</a>.</p>
+        {% endfor %}
+    </div>
+
+    <p><a href="{{ path('app_playlist_index') }}">&larr; Retour à mes playlists</a></p>
+{% endblock %}

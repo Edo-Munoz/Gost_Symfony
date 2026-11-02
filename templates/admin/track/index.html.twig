@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin - Morceaux{% endblock %}
+
+{% block body %}
+    <h2>Gérer les morceaux et les suggestions</h2>
+
+    <p>
+        <strong>En attente :</strong> <span id="stat-pending">...</span> |
+        <strong>Utilisateurs actifs :</strong> <span id="stat-users">...</span>
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Titre</th>
+                <th>Jeu</th>
+                <th>Compositeur</th>
+                <th>Proposé par</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for track in tracks %}
+            <tr>
+                <td>
+                    {{ track.title }}<br>
+                    <small><a href="{{ track.youtubeUrl }}" target="_blank" rel="noopener noreferrer">lien YouTube</a></small>
+                </td>
+                <td>{{ track.gameName }}</td>
+                <td>{{ track.composer ?: '-' }}</td>
+                <td>{{ track.addedBy ? track.addedBy.username : '-' }}</td>
+                <td id="status-{{ track.id }}">
+                    <span class="badge {{ track.approved ? '' : 'badge-pending' }}">{{ track.status }}</span>
+                </td>
+                <td>
+                    <div>
+                        <a href="{{ path('admin_track_edit', {id: track.id}) }}" class="btn btn-outline btn-small">Modifier</a>
+                        {% if not track.approved %}
+                            <button type="button" class="btn btn-small" id="btn-{{ track.id }}"
+                                    onclick="approveTrack({{ track.id }})">Approuver</button>
+                        {% endif %}
+                        <form method="post" action="{{ path('admin_track_delete', {id: track.id}) }}" 
+                              onsubmit="return confirm('Supprimer définitivement ce morceau ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_track' ~ track.id) }}">
+                            <button class="btn btn-outline btn-small">Supprimer</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="6">Aucun morceau.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        fetch('{{ path('admin_api_stats') }}')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('stat-pending').innerText = data.pending_tracks;
+                document.getElementById('stat-users').innerText = data.active_users;
+            });
+
+        function approveTrack(id) {
+            fetch('/admin/api/track/' + id + '/approve', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token('admin_api') }}' }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('status-' + id).innerHTML = '<span class="badge">approved</span>';
+                        document.getElementById('btn-' + id).remove();
+                        document.getElementById('stat-pending').innerText = data.pending_tracks;
+                    } else {
+                        alert(data.message || 'Erreur.');
+                    }
+                });
+        }
+    </script>
+{% endblock %}

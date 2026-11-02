@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil{% endblock %}
+
+{% block body %}
+    <h1>GOST</h1>
+    <p>Games Original Sound Tracks : Spotify mais pour la musique de jeux vidéo.</p>
+
+    <h2>Derniers morceaux ajoutés</h2>
+    <div class="track-list">
+        {% for track in tracks %}
+            {{ include('track/_item.html.twig', {track: track}) }}
+        {% else %}
+            <p>Aucun morceau pour le moment.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

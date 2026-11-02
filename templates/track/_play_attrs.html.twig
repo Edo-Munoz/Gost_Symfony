@@ -1,0 +1,11 @@
+data-track-id="{{ track.id }}"
+data-video="{{ track.youtubeId }}"
+data-title="{{ track.title }}"
+data-game="{{ track.gameName }}"
+{% if is_granted('ROLE_USER') %}
+    data-like-url="{{ path('app_track_like', {id: track.id}) }}"
+    data-like-token="{{ csrf_token('like' ~ track.id) }}"
+    data-liked="{{ app.user.likedTracks.contains(track) ? '1' : '0' }}"
+    data-add-url="{{ path('app_playlist_add_track', {id: track.id}) }}"
+    data-add-token="{{ csrf_token('add_track' ~ track.id) }}"
+{% endif %}

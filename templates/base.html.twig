@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{% block title %}GOST{% endblock %} - Games Original Sound Tracks</title>
+        <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
+        {% block stylesheets %}{% endblock %}
+        <script>
+            let currentTrackId = null;
+
+            function showMessage(text, type) {
+                const div = document.createElement('div');
+                div.className = 'alert alert-' + type;
+                div.textContent = text;
+                document.getElementById('ajax-messages').appendChild(div);
+                setTimeout(() => div.remove(), 3000);
+            }
+
+            function postAjax(url, formData) {
+                return fetch(url, { method: 'POST', body: formData, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(res => { if (!res.ok) { throw new Error(); } return res.json(); })
+                    .then(data => { showMessage(data.message, data.type); return data; })
+                    .catch(() => { showMessage('Une erreur est survenue.', 'danger'); return null; });
+            }
+
+            document.addEventListener('submit', function (event) {
+                const form = event.target;
+                if (!form.classList.contains('ajax-form')) { return; }
+                event.preventDefault();
+                postAjax(form.action, new FormData(form)).then(data => {
+                    if (data && 'liked' in data) { setLiked(form.dataset.trackId, data.liked); }
+                });
+            });
+
+            function setLiked(trackId, liked) {
+                document.querySelectorAll('[data-like-btn="' + trackId + '"]').forEach(b => {
+                    b.className = liked ? 'btn btn-small' : 'btn btn-outline btn-small';
+                    b.textContent = liked ? '♥ Liké' : '♡ Liker';
+                });
+                document.querySelectorAll('[data-track-id="' + trackId + '"][data-video]').forEach(b => {
+                    b.dataset.liked = liked ? '1' : '0';
+                });
+                if (String(currentTrackId) === String(trackId)) { setPlayerLiked(liked); }
+            }
+
+            function rowClick(event, row) {
+                if (event.target.closest('a, button, form, select, input')) { return; }
+                playTrack(row);
+            }
+
+            function playTrack(btn) {
+                const d = btn.dataset;
+                currentTrackId = d.trackId;
+                document.getElementById('player-video').classList.remove('hidden');
+                document.getElementById('player-close').classList.remove('hidden');
+                document.getElementById('global-player').src = 'https://www.youtube.com/embed/' + encodeURIComponent(d.video) + '?autoplay=1';
+                document.getElementById('player-title').textContent = d.title;
+                document.getElementById('player-game').textContent = d.game;
+
+                const likeBtn = document.getElementById('player-like');
+                if (likeBtn) {
+                    likeBtn.dataset.url = d.likeUrl;
+                    likeBtn.dataset.token = d.likeToken;
+                    document.getElementById('player-add-form').action = d.addUrl;
+                    document.getElementById('player-add-form').querySelector('[name=_token]').value = d.addToken;
+                    setPlayerLiked(d.liked === '1');
+                    setPlayerEnabled(true);
+                    likeBtn.classList.remove('hidden');
+                    document.getElementById('player-playlist').classList.remove('hidden');
+                }
+            }
+
+            function closePlayer() {
+                document.getElementById('global-player').removeAttribute('src');
+                document.getElementById('player-video').classList.add('hidden');
+                document.getElementById('player-close').classList.add('hidden');
+                document.getElementById('player-title').textContent = 'Aucun morceau en lecture';
+                document.getElementById('player-game').textContent = '';
+                currentTrackId = null;
+                if (document.getElementById('player-like')) {
+                    setPlayerLiked(false);
+                    setPlayerEnabled(false);
+                    document.getElementById('player-like').classList.add('hidden');
+                    document.getElementById('player-playlist').classList.add('hidden');
+                    document.getElementById('player-popup').classList.add('hidden');
+                }
+            }
+
+            function setPlayerEnabled(enabled) {
+                document.getElementById('player-like').disabled = !enabled;
+                document.getElementById('player-add-btn').disabled = !enabled;
+            }
+
+            function setPlayerLiked(liked) {
+                const btn = document.getElementById('player-like');
+                btn.textContent = liked ? '♥' : '♡';
+                btn.classList.toggle('liked', liked);
+                btn.title = liked ? 'Retirer des titres likés' : 'Ajouter aux titres likés';
+            }
+
+            function togglePlayerLike() {
+                const btn = document.getElementById('player-like');
+                const body = new FormData();
+                body.append('_token', btn.dataset.token);
+                postAjax(btn.dataset.url, body).then(data => {
+                    if (data) { setLiked(currentTrackId, data.liked); }
+                });
+            }
+
+            function togglePlayerPopup() {
+                document.getElementById('player-popup').classList.toggle('hidden');
+            }
+
+            function syncPlayer() {
+                const source = document.getElementById('playlist-source');
+                const select = document.getElementById('player-playlist-select');
+                if (source && select) {
+                    select.innerHTML = source.innerHTML;
+                    const hasPlaylists = select.options.length > 0;
+                    document.getElementById('player-add-form').classList.toggle('hidden', !hasPlaylists);
+                    document.getElementById('player-no-playlist').classList.toggle('hidden', hasPlaylists);
+                }
+                if (currentTrackId && document.getElementById('player-like')) {
+                    const playBtn = document.querySelector('[data-track-id="' + currentTrackId + '"][data-video]');
+                    if (playBtn) { setPlayerLiked(playBtn.dataset.liked === '1'); }
+                }
+            }
+
+            function updateHeaderHeight() {
+                const nav = document.getElementById('main-nav');
+                if (nav) { document.documentElement.style.setProperty('--header-h', nav.offsetHeight + 'px'); }
+            }
+            document.addEventListener('DOMContentLoaded', syncPlayer);
+            document.addEventListener('DOMContentLoaded', updateHeaderHeight);
+            document.addEventListener('turbo:load', syncPlayer);
+            document.addEventListener('turbo:load', updateHeaderHeight);
+            window.addEventListener('resize', updateHeaderHeight);
+        </script>
+        {% block javascripts %}
+            {% block importmap %}{{ importmap('app') }}{% endblock %}
+        {% endblock %}
+    </head>
+    <body>
+        <nav id="main-nav">
+            <a href="{{ path('app_home') }}">GOST</a>
+            <ul>
+                <li><a href="{{ path('app_track_index') }}">Rechercher</a></li>
+                {% if is_granted('ROLE_USER') %}
+                    <li><a href="{{ path('app_playlist_index') }}">Playlists</a></li>
+                    <li><a href="{{ path('app_liked_songs') }}">Titres likés</a></li>
+                    <li><a href="{{ path('app_track_suggest') }}">Proposer un morceau</a></li>
+                {% endif %}
+                {% if is_granted('ROLE_MODERATOR') %}
+                    <li><a href="{{ path('admin_track_index') }}">Admin morceaux</a></li>
+                {% endif %}
+                {% if is_granted('ROLE_ADMIN') %}
+                    <li><a href="{{ path('admin_user_index') }}">Admin utilisateurs</a></li>
+                {% endif %}
+            </ul>
+            <ul>
+                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+                    <li><a href="{{ path('app_account') }}">{{ app.user.username }}</a></li>
+                    <li><a href="{{ path('app_logout') }}">Déconnexion</a></li>
+                {% else %}
+                    <li><a href="{{ path('app_login') }}">Se connecter</a></li>
+                    <li><a href="{{ path('app_register') }}">S'inscrire</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+
+        <main id="main-content">
+            <div id="ajax-messages"></div>
+
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label }}" role="alert">
+                        <span>{{ message }}</span>
+                        <button type="button" class="alert-close" aria-label="Fermer" onclick="this.parentElement.remove()">✕</button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            {% block body %}{% endblock %}
+        </main>
+
+        <div id="player-bar" data-turbo-permanent>
+            <div id="player-video" class="hidden">
+                <iframe id="global-player"
+                        title="Lecteur YouTube"
+                        allow="encrypted-media; picture-in-picture"
+                        allowfullscreen>
+                </iframe>
+            </div>
+
+            <div id="player-info">
+                <div id="player-title">Aucun morceau en lecture</div>
+                <div id="player-game">&nbsp;</div>
+            </div>
+
+            <div id="player-actions">
+                {% if is_granted('ROLE_USER') %}
+                    <button type="button" id="player-like" class="btn-icon hidden" title="Ajouter aux titres likés" onclick="togglePlayerLike()" disabled>♡</button>
+
+                    <div id="player-playlist" class="hidden">
+                        <button type="button" id="player-add-btn" class="btn-icon" title="Ajouter à une playlist" onclick="togglePlayerPopup()" disabled>＋</button>
+                        <div id="player-popup" class="hidden">
+                            <form method="post" id="player-add-form" class="ajax-form" data-turbo="false">
+                                <input type="hidden" name="_token" value="">
+                                <select id="player-playlist-select" name="playlist" aria-label="Choisir une playlist"></select>
+                                <button class="btn btn-small">Ajouter</button>
+                            </form>
+                            <small id="player-no-playlist" class="hidden">Créez d'abord une <a href="{{ path('app_playlist_index') }}">playlist</a>.</small>
+                        </div>
+                    </div>
+                {% endif %}
+                <button type="button" id="player-close" class="btn-icon hidden" title="Fermer le morceau en cours" onclick="closePlayer()">✕</button>
+            </div>
+        </div>
+
+        {% if is_granted('ROLE_USER') %}
+            <select id="playlist-source" hidden>
+                {% for playlist in app.user.playlists %}
+                    <option value="{{ playlist.id }}">{{ playlist.name }}</option>
+                {% endfor %}
+            </select>
+        {% endif %}
+
+    </body>
+</html>

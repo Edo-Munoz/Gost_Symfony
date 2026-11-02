@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Rechercher{% endblock %}
+
+{% block body %}
+    <h2>Rechercher un morceau</h2>
+
+    <form method="get" action="{{ path('app_track_index') }}" role="search">
+        <input type="search" name="q" placeholder="Titre, jeu ou compositeur..." value="{{ query|default('') }}">
+        <button type="submit" class="btn">Rechercher</button>
+    </form>
+
+    <div class="track-list">
+        {% for track in tracks %}
+            {{ include('track/_item.html.twig', {track: track}) }}
+        {% else %}
+            <p>Aucun morceau trouvé.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

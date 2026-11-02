@@ -1,0 +1,105 @@
+<?php //c02a957e6c25d828fb13c5159c00073c
+
+return [PHP_INT_MAX, new class() implements \Symfony\Component\Cache\Traits\CachedValueInterface { public function getValue(): mixed { return \Symfony\Component\VarExporter\Internal\Hydrator::hydrate(
+    $o = [
+        clone (($p = &\Symfony\Component\VarExporter\Internal\Registry::$prototypes)['Doctrine\\ORM\\Query\\ParserResult'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('Doctrine\\ORM\\Query\\ParserResult')),
+        clone ($p['Doctrine\\ORM\\Query\\Exec\\SingleSelectSqlFinalizer'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('Doctrine\\ORM\\Query\\Exec\\SingleSelectSqlFinalizer')),
+        clone ($p['Doctrine\\ORM\\Query\\ResultSetMapping'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('Doctrine\\ORM\\Query\\ResultSetMapping')),
+    ],
+    null,
+    [
+        'Doctrine\\ORM\\Query\\ParserResult' => [
+            'sqlFinalizer' => [
+                $o[1],
+            ],
+            'resultSetMapping' => [
+                $o[2],
+            ],
+            'parameterMappings' => [
+                [
+                    'status' => [
+                        0,
+                    ],
+                ],
+            ],
+        ],
+        'Doctrine\\ORM\\Query\\Exec\\SingleSelectSqlFinalizer' => [
+            'sql' => [
+                1 => 'SELECT t0_.id AS id_0, t0_.title AS title_1, t0_.game_name AS game_name_2, t0_.composer AS composer_3, t0_.youtube_url AS youtube_url_4, t0_.status AS status_5, t0_.created_at AS created_at_6, t0_.added_by_id AS added_by_id_7 FROM track t0_ WHERE t0_.status = ? ORDER BY t0_.created_at DESC, t0_.id DESC',
+            ],
+        ],
+        'stdClass' => [
+            'aliasMap' => [
+                2 => [
+                    't' => 'App\\Entity\\Track',
+                ],
+            ],
+            'fieldMappings' => [
+                2 => [
+                    'id_0' => 'id',
+                    'title_1' => 'title',
+                    'game_name_2' => 'gameName',
+                    'composer_3' => 'composer',
+                    'youtube_url_4' => 'youtubeUrl',
+                    'status_5' => 'status',
+                    'created_at_6' => 'createdAt',
+                ],
+            ],
+            'columnAliasMappings' => [
+                2 => [
+                    'App\\Entity\\Track' => [
+                        't' => [
+                            'id' => 'id_0',
+                            'title' => 'title_1',
+                            'gameName' => 'game_name_2',
+                            'composer' => 'composer_3',
+                            'youtubeUrl' => 'youtube_url_4',
+                            'status' => 'status_5',
+                            'createdAt' => 'created_at_6',
+                        ],
+                    ],
+                ],
+            ],
+            'typeMappings' => [
+                2 => [
+                    'added_by_id_7' => 'integer',
+                ],
+            ],
+            'entityMappings' => [
+                2 => [
+                    't' => null,
+                ],
+            ],
+            'metaMappings' => [
+                2 => [
+                    'added_by_id_7' => 'added_by_id',
+                ],
+            ],
+            'columnOwnerMap' => [
+                2 => [
+                    'id_0' => 't',
+                    'title_1' => 't',
+                    'game_name_2' => 't',
+                    'composer_3' => 't',
+                    'youtube_url_4' => 't',
+                    'status_5' => 't',
+                    'created_at_6' => 't',
+                    'added_by_id_7' => 't',
+                ],
+            ],
+            'declaringClasses' => [
+                2 => [
+                    'id_0' => 'App\\Entity\\Track',
+                    'title_1' => 'App\\Entity\\Track',
+                    'game_name_2' => 'App\\Entity\\Track',
+                    'composer_3' => 'App\\Entity\\Track',
+                    'youtube_url_4' => 'App\\Entity\\Track',
+                    'status_5' => 'App\\Entity\\Track',
+                    'created_at_6' => 'App\\Entity\\Track',
+                ],
+            ],
+        ],
+    ],
+    $o[0],
+    []
+); } }];

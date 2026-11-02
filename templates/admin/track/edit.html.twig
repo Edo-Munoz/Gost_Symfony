@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier un morceau{% endblock %}
+
+{% block body %}
+    <section>
+        <h2>Modifier : {{ track.title }}</h2>
+        <p class="muted">
+            Statut : <span class="badge {{ track.approved ? '' : 'badge-pending' }}">{{ track.status }}</span>
+            {% if track.addedBy %}&middot; proposé par {{ track.addedBy.username }}{% endif %}
+        </p>
+
+        {{ form(form) }}
+
+        <a href="{{ path('admin_track_index') }}">&larr; Retour à la liste</a>
+    </section>
+{% endblock %}

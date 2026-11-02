@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon compte{% endblock %}
+
+{% block body %}
+    <h2>Mon compte</h2>
+    <article>
+        <p><strong>Nom d'utilisateur :</strong> {{ user.username }}</p>
+        <p><strong>Email :</strong> {{ user.email }}</p>
+        <p><strong>Rôles :</strong> {{ user.roles|join(', ') }}</p>
+        <p><strong>Membre depuis le :</strong> {{ user.createdAt|date('d/m/Y') }}</p>
+        <p>
+            <strong>Playlists :</strong> {{ user.playlists|length }} &middot;
+            <strong>Titres likés :</strong> {{ user.likedTracks|length }} &middot;
+            <strong>Morceaux proposés :</strong> {{ user.addedTracks|length }}
+        </p>
+    </article>
+{% endblock %}

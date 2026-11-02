@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin - Utilisateurs{% endblock %}
+
+{% block body %}
+    <h2>Gérer les utilisateurs</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Rôles</th>
+                <th>Banni</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for u in users %}
+            {% set currentRole = 'ROLE_ADMIN' in u.roles ? 'ROLE_ADMIN' : ('ROLE_MODERATOR' in u.roles ? 'ROLE_MODERATOR' : 'ROLE_USER') %}
+            <tr>
+                <td>{{ u.username }}</td>
+                <td>{{ u.email }}</td>
+                <td>{{ u.roles|join(', ') }}</td>
+                <td>{{ u.banned ? 'Oui' : 'Non' }}</td>
+                <td>
+                    <div>
+                        {% if u.id != app.user.id %}
+                            <form method="post" action="{{ path('admin_user_toggle_ban', {id: u.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ u.id) }}">
+                                <button class="btn btn-small {{ u.banned ? '' : 'btn-outline' }}">
+                                    {{ u.banned ? 'Débannir' : 'Bannir' }}
+                                </button>
+                            </form>
+                            <form method="post" action="{{ path('admin_user_role', {id: u.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('role' ~ u.id) }}">
+                                <select name="role" aria-label="Rôle">
+                                    <option value="ROLE_USER" {{ currentRole == 'ROLE_USER' ? 'selected' }}>Utilisateur</option>
+                                    <option value="ROLE_MODERATOR" {{ currentRole == 'ROLE_MODERATOR' ? 'selected' }}>Modérateur</option>
+                                    <option value="ROLE_ADMIN" {{ currentRole == 'ROLE_ADMIN' ? 'selected' }}>Admin</option>
+                                </select>
+                                <button class="btn btn-small">Changer le rôle</button>
+                            </form>
+                        {% else %}
+                            <em class="muted">C'est vous</em>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

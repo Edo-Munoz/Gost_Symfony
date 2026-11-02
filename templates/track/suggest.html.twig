@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Proposer un morceau{% endblock %}
+
+{% block body %}
+    <section>
+        <h2>Proposer un morceau</h2>
+        <p class="muted">Votre suggestion sera visible par tous une fois validée par un modérateur.</p>
+
+        {{ form(form) }}
+    </section>
+{% endblock %}

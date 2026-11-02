@@ -1,0 +1,32 @@
+<div class="track{{ track.youtubeId ? ' playable' : '' }}"{% if track.youtubeId %} {{ include('track/_play_attrs.html.twig') }} onclick="rowClick(event, this)" onkeydown="if (event.key === 'Enter') { rowClick(event, this); }" tabindex="0"{% endif %}>
+    <div>
+        <strong>{{ track.title }}</strong>
+        <span class="muted">- {{ track.gameName }}</span><br>
+        <small class="muted">{{ track.composer ?: 'Compositeur inconnu' }}</small>
+    </div>
+
+    <div class="actions">
+        {% if is_granted('ROLE_USER') %}
+            <form method="post" action="{{ path('app_track_like', {id: track.id}) }}" class="ajax-form" data-turbo="false" data-track-id="{{ track.id }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('like' ~ track.id) }}">
+                {% if app.user.likedTracks.contains(track) %}
+                    <button class="btn btn-small" data-like-btn="{{ track.id }}" title="Retirer des titres likés">♥ Liké</button>
+                {% else %}
+                    <button class="btn btn-outline btn-small" data-like-btn="{{ track.id }}" title="Ajouter aux titres likés">♡ Liker</button>
+                {% endif %}
+            </form>
+
+            {% if app.user.playlists|length > 0 %}
+                <form method="post" action="{{ path('app_playlist_add_track', {id: track.id}) }}" class="ajax-form" data-turbo="false">
+                    <input type="hidden" name="_token" value="{{ csrf_token('add_track' ~ track.id) }}">
+                    <select name="playlist" aria-label="Choisir une playlist">
+                        {% for playlist in app.user.playlists %}
+                            <option value="{{ playlist.id }}">{{ playlist.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button class="btn btn-outline btn-small">+ Playlist</button>
+                </form>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
